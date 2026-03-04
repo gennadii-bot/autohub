@@ -1,0 +1,36 @@
+# AvtoHub KZ Backend — systemd service
+# Install: sudo cp deploy/autohub.service /etc/systemd/system/
+#         sudo systemctl daemon-reload
+#         sudo systemctl enable autohub
+#         sudo systemctl start autohub
+
+[Unit]
+Description=AvtoHub KZ Backend (FastAPI)
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=gena
+Group=gena
+WorkingDirectory=/home/gena/AUTOHUB/backend
+
+# Load .env (optional: use - prefix to not fail if missing)
+EnvironmentFile=-/home/gena/AUTOHUB/backend/.env
+
+# Gunicorn + Uvicorn workers (no reload in production)
+ExecStart=/home/gena/AUTOHUB/backend/venv/bin/gunicorn app.main:app --bind 0.0.0.0:8000 --workers 4 --worker-class uvicorn.workers.UvicornWorker --access-logfile - --error-logfile - --capture-output
+
+Restart=always
+RestartSec=5
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=autohub
+
+[Install]
+WantedBy=multi-user.target
