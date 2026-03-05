@@ -160,11 +160,12 @@ export function StoRequests() {
         </p>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-slate-700 bg-slate-800/50">
-          <table className="w-full min-w-[640px] border-collapse">
+          <table className="w-full min-w-[820px] border-collapse">
             <thead>
               <tr className="border-b border-slate-700">
                 <th className="px-4 py-3 text-left text-sm font-medium text-slate-300">СТО</th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-slate-300">Город</th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-slate-300">Адрес</th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-slate-300">Статус</th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-slate-300">Телефон</th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-slate-300">Email</th>
@@ -188,6 +189,9 @@ export function StoRequests() {
                     </button>
                   </td>
                   <td className="px-4 py-4 text-slate-300">{r.city_name}</td>
+                  <td className="max-w-[180px] truncate px-4 py-4 text-slate-300" title={r.address}>
+                    {r.address}
+                  </td>
                   <td className="px-4 py-4">
                     <span
                       className={`rounded px-2 py-0.5 text-xs ${
@@ -326,6 +330,16 @@ export function StoRequests() {
                 <div>
                   <span className="text-slate-400">ИИН:</span> {detail.iin}
                 </div>
+                {detail.bin && (
+                  <div>
+                    <span className="text-slate-400">БИН:</span> {detail.bin}
+                  </div>
+                )}
+                {detail.ip_name && (
+                  <div>
+                    <span className="text-slate-400">ИП / Юр. лицо:</span> {detail.ip_name}
+                  </div>
+                )}
                 <div>
                   <span className="text-slate-400">Регион:</span> {detail.region_name}
                 </div>
@@ -337,7 +351,8 @@ export function StoRequests() {
                 </div>
                 {detail.sto_description && (
                   <div className="col-span-2">
-                    <span className="text-slate-400">Описание:</span> {detail.sto_description}
+                    <span className="text-slate-400">Описание / График работы:</span>{" "}
+                    {detail.sto_description}
                   </div>
                 )}
                 {detail.rejection_reason && (

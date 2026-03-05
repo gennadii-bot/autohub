@@ -70,7 +70,10 @@ export function StatsChart({
   variant = "line",
   dataKey = "revenue",
 }: StatsChartProps) {
-  const safeData = ensureArray(data);
+  const safeData = (data == null ? [] : Array.isArray(data) ? data : []) as (
+    | StatsChartPoint
+    | PieChartPoint
+  )[];
   const safeComparison = ensureArray(comparisonData) as StatsChartPoint[];
 
   if (variant === "pie") {
@@ -102,7 +105,9 @@ export function StatsChart({
                 cx="50%"
                 cy="50%"
                 outerRadius={120}
-                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                label={({ name, percent }) =>
+                  `${name} ${((percent ?? 0) * 100).toFixed(0)}%`
+                }
                 labelLine={{ stroke: "#94a3b8" }}
               >
                 {pieData.map((_, i) => (
@@ -115,7 +120,7 @@ export function StatsChart({
                   border: "1px solid #334155",
                   borderRadius: "8px",
                 }}
-                formatter={(value: number) => [value, "Записей"]}
+                formatter={(value) => [(value ?? 0), "Записей"]}
               />
             </PieChart>
           </ResponsiveContainer>
@@ -174,7 +179,7 @@ export function StatsChart({
       }}
       labelStyle={{ color: "#94a3b8" }}
       formatter={(value: number | undefined) => [value ?? 0, ""]}
-      labelFormatter={(label: string) => `Дата: ${label}`}
+      labelFormatter={(label) => `Дата: ${String(label)}`}
     />
   );
 

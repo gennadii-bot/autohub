@@ -9,7 +9,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { Users, Building2, Calendar } from "lucide-react";
-import { getAnalytics } from "../api/admin";
+import { getAnalyticsChartData } from "../api/admin";
 import type { AnalyticsPoint } from "../api/admin";
 
 type ChartType = "users" | "stos" | "services";
@@ -39,8 +39,8 @@ export function AnalyticsChart() {
     setLoading(true);
     setError(null);
     try {
-      const result = await getAnalytics(type, period);
-      setData(result);
+      const result = await getAnalyticsChartData(type, period);
+      setData(Array.isArray(result) ? result : []);
     } catch {
       setError("Не удалось загрузить аналитику");
       setData([]);
@@ -143,7 +143,7 @@ export function AnalyticsChart() {
                 }}
                 labelStyle={{ color: "#94a3b8" }}
                 formatter={(value: number | undefined) => [value ?? 0, "Кол-во"]}
-                labelFormatter={(label) => `Дата: ${label}`}
+                labelFormatter={(label) => `Дата: ${String(label)}`}
               />
               <Line
                 type="monotone"

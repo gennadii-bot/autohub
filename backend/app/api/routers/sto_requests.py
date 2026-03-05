@@ -27,6 +27,7 @@ async def create_sto_request(
     region_id: int = Form(...),
     city_id: int = Form(...),
     address: str = Form(..., min_length=1, max_length=512),
+    password: str | None = Form(None, min_length=8, max_length=72),
     photo: UploadFile | None = File(None),
     service: STORequestService = Depends(get_sto_request_service),
 ):
@@ -45,5 +46,6 @@ async def create_sto_request(
         region_id=region_id,
         city_id=city_id,
         address=address,
+        password=password,
         photo=photo,
     )

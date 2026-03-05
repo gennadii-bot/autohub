@@ -68,6 +68,62 @@ def send_partner_activation_email(to_email: str, activation_link: str) -> bool:
         return False
 
 
+def send_partner_welcome_email(to_email: str, login_url: str) -> bool:
+    """
+    Send welcome email when partner already set password at registration.
+    Returns True on success, False on failure.
+    """
+    if not settings.resend_api_key:
+        logger.error("RESEND_API_KEY not configured, cannot send welcome email")
+        return False
+
+    resend.api_key = settings.resend_api_key
+    from_addr = settings.resend_from or settings.smtp_from
+    if " <" not in from_addr and "<" not in from_addr:
+        from_addr = f"AvtoHub <{from_addr}>"
+
+    subject = "Ваш партнёрский аккаунт AvtoHub активирован"
+    html = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <style>
+            body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+            .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+            .button {{ display: inline-block; padding: 12px 24px; background: #10b981; color: white !important; text-decoration: none; border-radius: 8px; margin: 16px 0; }}
+            .footer {{ margin-top: 24px; font-size: 12px; color: #666; }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h2>Добро пожаловать в AvtoHub!</h2>
+            <p>Ваша заявка на подключение СТО одобрена. Ваш аккаунт активирован.</p>
+            <p>Войдите в кабинет партнёра, используя email и пароль, указанные при регистрации:</p>
+            <p><a href="{login_url}" class="button">Войти в кабинет</a></p>
+            <div class="footer">
+                <p>AvtoHub KZ — платформа онлайн-записи в СТО</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
+    try:
+        params = {
+            "from": from_addr,
+            "to": [to_email],
+            "subject": subject,
+            "html": html,
+        }
+        resend.Emails.send(params)
+        logger.info("Welcome email sent to %s", to_email)
+        return True
+    except Exception as e:
+        logger.exception("Failed to send welcome email to %s: %s", to_email, e)
+        return False
+
+
 def send_partner_rejection_email(to_email: str, reason: str | None = None) -> bool:
     """
     Send partner rejection email via Resend.

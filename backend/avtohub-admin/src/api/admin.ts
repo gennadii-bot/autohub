@@ -85,6 +85,31 @@ export async function getAnalytics(
   return data as AnalyticsRangePoint[] | AnalyticsResponse;
 }
 
+/** Fetches analytics for simple chart (type + period). Returns AnalyticsPoint[]. */
+export async function getAnalyticsChartData(
+  type: "users" | "stos" | "services",
+  period: 7 | 30 | 90 | 365
+): Promise<AnalyticsPoint[]> {
+  const to = new Date();
+  const from = new Date();
+  from.setDate(from.getDate() - period);
+  const params = {
+    from: from.toISOString().slice(0, 10),
+    to: to.toISOString().slice(0, 10),
+  };
+  const result = await getAnalytics(params);
+  const arr = Array.isArray(result)
+    ? result
+    : (result as AnalyticsResponse).current ?? (result as AnalyticsResponse).grouped_data;
+  const raw = Array.isArray(arr) ? arr : [];
+  const key =
+    type === "users" ? "users" : type === "stos" ? "stos" : "bookings_completed";
+  return (raw as AnalyticsRangePoint[]).map((r) => ({
+    date: r.date,
+    count: (r as unknown as Record<string, number>)[key] ?? 0,
+  }));
+}
+
 /** @deprecated Use getAnalytics */
 export async function getAnalyticsRange(
   fromDate: string,

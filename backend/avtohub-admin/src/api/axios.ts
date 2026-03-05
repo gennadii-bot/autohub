@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosHeaders } from "axios";
 
 const baseURL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 
@@ -12,9 +12,9 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
+  config.headers = config.headers ?? new AxiosHeaders();
   const token = localStorage.getItem("access_token");
   if (token) {
-    if (!config.headers) config.headers = {};
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;

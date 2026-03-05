@@ -13,13 +13,6 @@ const LABELS: Record<string, string> = {
   revenue: "Выручка",
 };
 
-const ICONS: Record<string, typeof Users> = {
-  users: Users,
-  bookings: Calendar,
-  stos: Building2,
-  revenue: DollarSign,
-};
-
 interface AnalyticsKPICardsProps {
   kpi: {
     users: AnalyticsKpi;

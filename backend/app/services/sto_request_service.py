@@ -10,6 +10,7 @@ from fastapi import UploadFile
 
 from app.core.config import settings
 from app.core.exceptions import BadRequestError, ConflictError, NotFoundError, ValidationError, Errors
+from app.core.security import hash_password
 from app.repositories.sto_request_repository import STORequestRepository
 from app.repositories.region_repository import RegionRepository
 from app.repositories.city_repository import CityRepository
@@ -78,6 +79,7 @@ class STORequestService:
         region_id: int,
         city_id: int,
         address: str,
+        password: str | None = None,
         photo: UploadFile | None = None,
     ) -> dict:
         """Create STO request with validation and photo upload."""
@@ -109,6 +111,10 @@ class STORequestService:
         _validate_iin(iin)
         _validate_bin(bin_val)
         _validate_photo(photo)
+
+        password_hash: str | None = None
+        if password and len(password) >= 8:
+            password_hash = hash_password(password)
 
         # Uniqueness among pending
         if await self.sto_request_repo.email_exists_pending(email):
@@ -146,6 +152,7 @@ class STORequestService:
             city_id=city_id,
             address=address,
             photo_url=photo_url,
+            password_hash=password_hash,
             status="pending",
         )
 

@@ -315,15 +315,26 @@ class AdminService:
         if await self.user_repo.email_exists(req.email):
             raise ConflictError(*Errors.EMAIL_EXISTS)
 
-        # Create User (sto_owner, is_active=False)
-        temp_password = secrets.token_urlsafe(24)
-        user = await self.user_repo.create(
-            email=req.email.strip().lower(),
-            password_hash=hash_password(temp_password),
-            role=UserRole.sto_owner,
-            city_id=req.city_id,
-        )
-        await self.user_repo.update_is_active(user.id, False)
+        # Create User (sto_owner)
+        # Use stored password_hash if partner set password at registration, else temp + activation
+        pwd_hash = getattr(req, "password_hash", None) if req else None
+        if pwd_hash:
+            user = await self.user_repo.create(
+                email=req.email.strip().lower(),
+                password_hash=pwd_hash,
+                role=UserRole.sto_owner,
+                city_id=req.city_id,
+            )
+            await self.user_repo.update_is_active(user.id, True)
+        else:
+            temp_password = secrets.token_urlsafe(24)
+            user = await self.user_repo.create(
+                email=req.email.strip().lower(),
+                password_hash=hash_password(temp_password),
+                role=UserRole.sto_owner,
+                city_id=req.city_id,
+            )
+            await self.user_repo.update_is_active(user.id, False)
 
         # Create STO
         from app.models import STO
@@ -354,20 +365,27 @@ class AdminService:
         await self.sto_repo.db.flush()
         await self.sto_repo.db.refresh(sto)
 
-        # Create activation token and send email
-        token_str = secrets.token_urlsafe(32)
-        expires_at = datetime.now(timezone.utc) + timedelta(
-            hours=settings.activation_token_expire_hours
+        # Send email: welcome (if password set) or activation (set-password link)
+        from app.services.email_service import (
+            send_partner_activation_email,
+            send_partner_welcome_email,
         )
-        await self.activation_token_repo.create(user.id, token_str, expires_at)
 
-        from app.services.email_service import send_partner_activation_email
-
-        activation_link = (
-            f"{settings.partner_frontend_url}/set-password?token={token_str}"
-        )
-        if not send_partner_activation_email(req.email, activation_link):
-            raise ConflictError(*Errors.EMAIL_SEND_FAILED)
+        if pwd_hash:
+            login_url = f"{settings.partner_frontend_url}/login"
+            if not send_partner_welcome_email(req.email, login_url):
+                raise ConflictError(*Errors.EMAIL_SEND_FAILED)
+        else:
+            token_str = secrets.token_urlsafe(32)
+            expires_at = datetime.now(timezone.utc) + timedelta(
+                hours=settings.activation_token_expire_hours
+            )
+            await self.activation_token_repo.create(user.id, token_str, expires_at)
+            activation_link = (
+                f"{settings.partner_frontend_url}/set-password?token={token_str}"
+            )
+            if not send_partner_activation_email(req.email, activation_link):
+                raise ConflictError(*Errors.EMAIL_SEND_FAILED)
 
         await self.sto_request_repo.update_status(req.id, "approved")
 
