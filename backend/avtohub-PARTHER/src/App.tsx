@@ -2,7 +2,9 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { PartnerProtectedRoute } from "./routes/PartnerProtectedRoute";
 import { PartnerLayout } from "./layouts/PartnerLayout";
+import { Landing } from "./pages/Landing";
 import { Login } from "./pages/Login";
+import { Register } from "./pages/Register";
 import { SetPassword } from "./pages/SetPassword";
 import { Dashboard } from "./pages/Dashboard";
 import { Bookings } from "./pages/Bookings";
@@ -16,17 +18,17 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
+          <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
           <Route path="/set-password" element={<SetPassword />} />
           <Route
-            path="/"
             element={
               <PartnerProtectedRoute>
                 <PartnerLayout />
               </PartnerProtectedRoute>
             }
           >
-            <Route index element={<Navigate to="/dashboard" replace />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="bookings" element={<Bookings />} />
             <Route path="services" element={<Services />} />
