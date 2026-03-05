@@ -5,6 +5,7 @@ import { PartnerLayout } from "./layouts/PartnerLayout";
 import { Landing } from "./pages/Landing";
 import { Login } from "./pages/Login";
 import { Register } from "./pages/Register";
+import { RegisterSuccess } from "./pages/RegisterSuccess";
 import { SetPassword } from "./pages/SetPassword";
 import { Dashboard } from "./pages/Dashboard";
 import { Bookings } from "./pages/Bookings";
@@ -21,6 +22,7 @@ export default function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/register-success" element={<RegisterSuccess />} />
           <Route path="/set-password" element={<SetPassword />} />
           <Route
             element={
