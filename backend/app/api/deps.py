@@ -25,7 +25,7 @@ from app.repositories.favorite_repository import FavoriteRepository
 from app.repositories.message_repository import MessageRepository
 from app.repositories.notification_repository import NotificationRepository
 from app.repositories.user_repository import UserRepository
-from app.services import AuthService, BookingService, CityService, GeoService, RegionService, STOService
+from app.services import AuthService, BookingService, CityService, DistrictService, GeoService, RegionService, STOService
 from app.services.service_service import ServiceService
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token", auto_error=False)
@@ -123,6 +123,10 @@ def get_city_service(db: AsyncSession = Depends(get_db)) -> CityService:
 
 def get_region_service(db: AsyncSession = Depends(get_db)) -> RegionService:
     return RegionService(db)
+
+
+def get_district_service(db: AsyncSession = Depends(get_db)) -> DistrictService:
+    return DistrictService(db)
 
 
 def get_geo_service(db: AsyncSession = Depends(get_db)) -> GeoService:

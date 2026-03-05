@@ -14,4 +14,6 @@ class CityResponse(BaseModel):
     id: int
     name: str = Field(..., min_length=1, max_length=255)
     region_id: int = Field(..., description="ID области")
+    district_id: int | None = Field(None, description="ID района")
+    type: str | None = Field(None, description="Тип: city, town, district_center")
     region: str = Field(default="", validation_alias="region_name", min_length=0, max_length=255)

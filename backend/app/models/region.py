@@ -17,3 +17,8 @@ class Region(Base):
         back_populates="region",
         cascade="all, delete-orphan",
     )
+    districts: Mapped[list["District"]] = relationship(
+        "District",
+        back_populates="region",
+        cascade="all, delete-orphan",
+    )

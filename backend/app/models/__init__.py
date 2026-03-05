@@ -3,6 +3,7 @@
 from app.models.activation_token import ActivationToken
 from app.models.booking import Booking
 from app.models.city import City
+from app.models.district import District
 from app.models.favorite import Favorite
 from app.models.message import Message
 from app.models.notification import Notification
@@ -28,6 +29,7 @@ __all__ = [
     "StoSchedule",
     "STOStatus",
     "City",
+    "District",
     "Region",
     "Service",
     "ServiceCatalog",

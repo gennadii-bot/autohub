@@ -3,6 +3,7 @@
 from app.schemas.auth import LoginRequest, RegisterRequest, TokenResponse, UserMeResponse
 from app.schemas.booking import BookingCreate, BookingResponse
 from app.schemas.city import CityResponse, GeoCityRequest
+from app.schemas.district import DistrictResponse
 from app.schemas.region import RegionResponse
 from app.schemas.sto import (
     ServiceCreate,
@@ -22,6 +23,7 @@ __all__ = [
     "BookingCreate",
     "BookingResponse",
     "CityResponse",
+    "DistrictResponse",
     "GeoCityRequest",
     "RegionResponse",
     "ServiceResponse",

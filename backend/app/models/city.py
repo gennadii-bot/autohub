@@ -17,10 +17,20 @@ class City(Base):
         nullable=False,
         index=True,
     )
+    district_id: Mapped[int | None] = mapped_column(
+        ForeignKey("districts.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    type: Mapped[str | None] = mapped_column(String(50), nullable=True, index=True)
     lat: Mapped[float | None] = mapped_column(Float, nullable=True)
     lng: Mapped[float | None] = mapped_column(Float, nullable=True)
 
     region: Mapped["Region"] = relationship("Region", back_populates="cities")
+    district: Mapped["District | None"] = relationship(
+        "District",
+        back_populates="cities",
+    )
 
     @property
     def region_name(self) -> str:

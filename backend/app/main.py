@@ -18,7 +18,7 @@ from app.api.exception_handlers import (
     unexpected_error_handler,
     validation_error_handler,
 )
-from app.api.routers import admin, auth, booking, chat, cities, favorites, geo, notifications, partner, partner_chat, regions, reviews, services, sto, sto_requests
+from app.api.routers import admin, auth, booking, chat, cities, districts, favorites, geo, notifications, partner, partner_chat, regions, reviews, services, sto, sto_requests
 from app.core.logging_config import setup_logging
 from app.core.config import settings
 from app.database.session import engine
@@ -104,6 +104,7 @@ app.add_middleware(
 app.include_router(admin.router)
 app.include_router(auth.router)
 app.include_router(cities.router)
+app.include_router(districts.router)
 app.include_router(regions.router)
 app.include_router(geo.router)
 app.include_router(sto.router)

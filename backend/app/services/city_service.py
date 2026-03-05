@@ -22,10 +22,22 @@ class CityService:
             logger.exception("get_city failed: %s", e)
             return None
 
-    async def list_cities(self, region_id: int | None = None) -> list[City]:
-        """Get cities, optionally by region_id. Returns [] on error."""
+    async def list_cities(
+        self,
+        region_id: int | None = None,
+        district_id: int | None = None,
+    ) -> list[City]:
+        """Get cities, optionally by region_id or district_id. Returns [] on error."""
         try:
-            return await self.repo.get_all(region_id=region_id)
+            return await self.repo.get_all(region_id=region_id, district_id=district_id)
         except Exception as e:
             logger.exception("list_cities failed: %s", e)
+            return []
+
+    async def search_cities(self, q: str, limit: int = 50) -> list[City]:
+        """Search cities by name (ILIKE). Returns [] on error."""
+        try:
+            return await self.repo.search(q=q, limit=limit)
+        except Exception as e:
+            logger.exception("search_cities failed: %s", e)
             return []
