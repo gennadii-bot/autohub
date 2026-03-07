@@ -48,6 +48,10 @@ class STO(Base):
     )
     telegram_chat_id: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
 
+    region: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    city_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    owner_initials: Mapped[str | None] = mapped_column(String(64), nullable=True)
+
     city: Mapped["City"] = relationship("City", back_populates="stos")
     owner: Mapped["User | None"] = relationship("User", back_populates="owned_stos")
     services: Mapped[list["Service"]] = relationship(
@@ -75,6 +79,11 @@ class STO(Base):
     )
     favorited_by: Mapped[list["Favorite"]] = relationship(
         "Favorite",
+        back_populates="sto",
+        cascade="all, delete-orphan",
+    )
+    images: Mapped[list["STOImage"]] = relationship(
+        "STOImage",
         back_populates="sto",
         cascade="all, delete-orphan",
     )

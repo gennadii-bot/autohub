@@ -135,6 +135,10 @@ class PartnerProfileResponse(BaseModel):
     sto_address: str | None = None
     sto_description: str | None = None
     sto_image_url: str | None = None
+    sto_region: str | None = None
+    sto_city: str | None = None
+    sto_owner_initials: str | None = None
+    sto_images: list[dict] = []
 
 
 class PartnerProfileUpdate(BaseModel):
@@ -146,6 +150,9 @@ class PartnerProfileUpdate(BaseModel):
     sto_address: str | None = None
     sto_description: str | None = None
     sto_image_url: str | None = None
+    sto_region: str | None = None
+    sto_city: str | None = None
+    sto_owner_initials: str | None = None
 
 
 class PartnerStoItem(BaseModel):

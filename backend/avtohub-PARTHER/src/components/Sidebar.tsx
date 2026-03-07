@@ -21,7 +21,12 @@ const ITEMS = [
   { to: "/profile", label: "Профиль", icon: User },
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+  open?: boolean;
+  onClose?: () => void;
+}
+
+export function Sidebar({ open = true, onClose }: SidebarProps) {
   const { logout, user } = useAuth();
   const navigate = useNavigate();
   const [chatUnread, setChatUnread] = useState(0);
@@ -42,7 +47,11 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="fixed left-0 top-0 z-40 flex h-screen w-64 flex-col border-r border-slate-800 bg-slate-900/95 backdrop-blur-xl">
+    <aside
+      className={`fixed left-0 top-0 z-40 flex h-screen w-64 flex-col border-r border-slate-800 bg-slate-900/95 backdrop-blur-xl transition-transform lg:translate-x-0 ${
+        open ? "translate-x-0" : "-translate-x-full"
+      }`}
+    >
       <div className="border-b border-slate-800 p-6">
         <Link to="/dashboard" className="text-lg font-semibold text-white">
           AvtoHub Партнёр
@@ -53,6 +62,7 @@ export function Sidebar() {
           <NavLink
             key={to}
             to={to}
+            onClick={() => onClose?.()}
             className={({ isActive }) =>
               `relative flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium ${
                 isActive

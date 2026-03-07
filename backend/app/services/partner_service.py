@@ -20,6 +20,7 @@ from app.repositories.booking_repository import BookingRepository
 from app.repositories.message_repository import MessageRepository
 from app.repositories.review_repository import ReviewRepository
 from app.repositories.service_catalog_repository import ServiceCatalogRepository
+from app.repositories.sto_image_repository import STOImageRepository
 from app.repositories.sto_repository import STORepository
 from app.repositories.sto_service_repository import StoServiceRepository
 from app.repositories.user_repository import UserRepository
@@ -61,6 +62,7 @@ class PartnerService:
         user_repo: UserRepository,
         catalog_repo: ServiceCatalogRepository,
         msg_repo: MessageRepository | None = None,
+        sto_image_repo: STOImageRepository | None = None,
     ):
         self.sto_repo = sto_repo
         self.booking_repo = booking_repo
@@ -69,6 +71,7 @@ class PartnerService:
         self.user_repo = user_repo
         self.catalog_repo = catalog_repo
         self.msg_repo = msg_repo
+        self.sto_image_repo = sto_image_repo
 
     def _require_sto_owner(self, user: dict) -> None:
         if user.get("role") not in ("sto_owner", "sto"):
@@ -650,7 +653,10 @@ class PartnerService:
         sto_address = None
         sto_description = None
         sto_image_url = None
-        stos = await self.sto_repo.get_active_stos_by_owner(user_id)
+        sto_region = None
+        sto_city = None
+        sto_owner_initials = None
+        sto_images: list[dict] = []
         if stos:
             s = stos[0]
             sto_id = s.id
@@ -659,6 +665,10 @@ class PartnerService:
             sto_address = s.address
             sto_description = s.description
             sto_image_url = s.image_url
+            sto_region = getattr(s, "region", None)
+            sto_city = getattr(s, "city_name", None)
+            sto_owner_initials = getattr(s, "owner_initials", None)
+            sto_images = [{"id": img.id, "image_url": img.image_url} for img in (s.images or [])]
 
         return PartnerProfileResponse(
             id=user.id,
@@ -672,6 +682,10 @@ class PartnerService:
             sto_address=sto_address,
             sto_description=sto_description,
             sto_image_url=sto_image_url,
+            sto_region=sto_region,
+            sto_city=sto_city,
+            sto_owner_initials=sto_owner_initials,
+            sto_images=sto_images,
         )
 
     async def update_profile(
@@ -692,6 +706,9 @@ class PartnerService:
             or payload.sto_address is not None
             or payload.sto_description is not None
             or payload.sto_image_url is not None
+            or payload.sto_region is not None
+            or payload.sto_city is not None
+            or payload.sto_owner_initials is not None
         ):
             s = stos[0]
             await self.sto_repo.update_profile(
@@ -701,6 +718,9 @@ class PartnerService:
                 address=payload.sto_address,
                 description=payload.sto_description,
                 image_url=payload.sto_image_url,
+                region=payload.sto_region,
+                city_name=payload.sto_city,
+                owner_initials=payload.sto_owner_initials,
             )
 
         return await self.get_profile(user_id)
@@ -734,3 +754,55 @@ class PartnerService:
             raise NotFoundError(*Errors.STO_NOT_FOUND)
         await self.sto_repo.update_profile(stos[0].id, image_url=relative_url)
         return relative_url
+
+    async def upload_sto_photo(self, owner_id: int, file: UploadFile) -> dict:
+        """Add photo to sto_images (max 10 per STO). Returns {image_url, id}."""
+        from app.core.exceptions import BadRequestError
+
+        ALLOWED_EXT = (".jpg", ".jpeg", ".png", ".webp")
+        MAX_SIZE = 5 * 1024 * 1024  # 5 MB
+        MAX_IMAGES = 10
+
+        if not self.sto_image_repo:
+            raise NotFoundError(*Errors.STO_NOT_FOUND)
+
+        if not file.filename:
+            raise BadRequestError(*Errors.PHOTO_FORMAT_INVALID)
+        ext = Path(file.filename).suffix.lower()
+        if ext not in ALLOWED_EXT:
+            raise BadRequestError(*Errors.PHOTO_FORMAT_INVALID)
+        content = await file.read()
+        if len(content) > MAX_SIZE:
+            raise BadRequestError(*Errors.PHOTO_TOO_LARGE)
+
+        stos = await self.sto_repo.get_active_stos_by_owner(owner_id)
+        if not stos:
+            raise NotFoundError(*Errors.STO_NOT_FOUND)
+        sto_id = stos[0].id
+
+        count = await self.sto_image_repo.count_by_sto(sto_id)
+        if count >= MAX_IMAGES:
+            raise BadRequestError(*Errors.PHOTO_FORMAT_INVALID, message="Максимум 10 фото на СТО")
+
+        media_root = Path(settings.media_root)
+        sto_dir = media_root / "stos"
+        sto_dir.mkdir(parents=True, exist_ok=True)
+        filename = f"{secrets.token_hex(8)}{ext}"
+        filepath = sto_dir / filename
+        filepath.write_bytes(content)
+
+        relative_url = f"/{settings.media_root}/stos/{filename}"
+        img = await self.sto_image_repo.create(sto_id, relative_url)
+        return {"image_url": relative_url, "id": img.id}
+
+    async def delete_sto_photo(self, owner_id: int, image_id: int) -> bool:
+        """Delete photo from sto_images. Returns True if deleted."""
+        if not self.sto_image_repo:
+            return False
+        img = await self.sto_image_repo.get_by_id(image_id)
+        if not img:
+            return False
+        sto_ids = await self._get_owner_sto_ids(owner_id)
+        if img.sto_id not in sto_ids:
+            raise ForbiddenError(*Errors.FORBIDDEN)
+        return await self.sto_image_repo.delete_by_id(image_id)

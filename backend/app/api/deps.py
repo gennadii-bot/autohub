@@ -16,6 +16,7 @@ from app.repositories.service_catalog_repository import ServiceCatalogRepository
 from app.repositories.service_repository import ServiceRepository
 from app.repositories.region_repository import RegionRepository
 from app.repositories.review_repository import ReviewRepository
+from app.repositories.sto_image_repository import STOImageRepository
 from app.repositories.sto_repository import STORepository
 from app.repositories.sto_schedule_repository import StoScheduleRepository
 from app.repositories.sto_service_repository import StoServiceRepository
@@ -77,6 +78,12 @@ def get_booking_repository(db: AsyncSession = Depends(get_db)) -> BookingReposit
 
 def get_sto_repository(db: AsyncSession = Depends(get_db)) -> STORepository:
     return STORepository(db)
+
+
+def get_sto_image_repository(
+    db: AsyncSession = Depends(get_db),
+) -> STOImageRepository:
+    return STOImageRepository(db)
 
 
 def get_sto_service_repository(

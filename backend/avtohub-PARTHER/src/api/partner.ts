@@ -197,6 +197,10 @@ export interface PartnerProfile {
   sto_address?: string | null;
   sto_description?: string | null;
   sto_image_url?: string | null;
+  sto_region?: string | null;
+  sto_city?: string | null;
+  sto_owner_initials?: string | null;
+  sto_images?: Array<{ id: number; image_url: string }>;
 }
 
 export interface PartnerProfileUpdate {
@@ -206,6 +210,9 @@ export interface PartnerProfileUpdate {
   sto_address?: string | null;
   sto_description?: string | null;
   sto_image_url?: string | null;
+  sto_region?: string | null;
+  sto_city?: string | null;
+  sto_owner_initials?: string | null;
 }
 
 export async function getPartnerProfile(): Promise<PartnerProfile> {
@@ -298,4 +305,21 @@ export async function uploadProfilePhoto(file: File): Promise<{ url: string }> {
     headers: { "Content-Type": "multipart/form-data" },
   });
   return data!;
+}
+
+export async function uploadStoPhoto(
+  file: File
+): Promise<{ success: boolean; image_url: string; id: number }> {
+  const form = new FormData();
+  form.append("file", file);
+  const { data } = await api.post<{ success: boolean; image_url: string; id: number }>(
+    "/partner/sto/upload-photo",
+    form,
+    { headers: { "Content-Type": "multipart/form-data" } }
+  );
+  return data!;
+}
+
+export async function deleteStoPhoto(imageId: number): Promise<void> {
+  await api.delete(`/partner/sto/photos/${imageId}`);
 }

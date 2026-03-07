@@ -57,7 +57,7 @@ export function PartnerDashboard() {
   return (
     <div className="space-y-8">
       <h1 className="text-2xl font-semibold text-white sm:text-3xl">Дашборд</h1>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {CARDS.map(({ label, key, icon: Icon }) => {
           let value: string | number = stats ? (stats[key] as number) : "—";
           if (key === "revenue" && typeof value === "number") value = value.toFixed(0);

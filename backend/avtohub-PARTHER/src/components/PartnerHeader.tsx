@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Bell } from "lucide-react";
+import { Bell, Menu } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import {
   getNotifications,
@@ -7,7 +7,12 @@ import {
   markAllNotificationsRead,
 } from "../api/notifications";
 
-export function PartnerHeader() {
+interface PartnerHeaderProps {
+  onMenuClick?: () => void;
+  className?: string;
+}
+
+export function PartnerHeader({ onMenuClick, className = "" }: PartnerHeaderProps) {
   const { user } = useAuth();
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifs, setNotifs] = useState<{ id: number; title: string; is_read: boolean }[]>([]);
@@ -35,8 +40,20 @@ export function PartnerHeader() {
   }, [notifOpen, fetchNotifs, fetchUnreadCount]);
 
   return (
-    <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-slate-800 bg-slate-950/95 px-6 backdrop-blur-xl">
-      <div className="text-lg font-semibold text-white">AvtoHub Партнёр</div>
+    <header className={`sticky top-0 z-40 flex h-16 items-center justify-between border-b border-slate-800 bg-slate-950/95 px-4 backdrop-blur-xl sm:px-6 ${className}`.trim()}>
+      <div className="flex items-center gap-3">
+        {onMenuClick && (
+          <button
+            type="button"
+            onClick={onMenuClick}
+            className="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white lg:hidden"
+            aria-label="Меню"
+          >
+            <Menu className="h-6 w-6" />
+          </button>
+        )}
+        <span className="text-lg font-semibold text-white">AvtoHub Партнёр</span>
+      </div>
       <div className="flex items-center gap-4">
         <div className="relative">
           <button

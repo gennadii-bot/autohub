@@ -206,14 +206,17 @@ class STORepository:
         return result.scalar_one_or_none() is not None
 
     async def get_active_stos_by_owner(self, owner_id: int) -> list[STO]:
-        """Get all active STOs owned by user, ordered by created_at. Loads city."""
+        """Get all active STOs owned by user, ordered by created_at. Loads city and images."""
         result = await self.db.execute(
             select(STO)
             .where(
                 STO.owner_id == owner_id,
                 STO.status == STOStatus.active,
             )
-            .options(selectinload(STO.city))
+            .options(
+                selectinload(STO.city),
+                selectinload(STO.images),
+            )
             .order_by(STO.created_at.desc())
         )
         return list(result.scalars().unique().all())
@@ -240,6 +243,9 @@ class STORepository:
         address: str | None = None,
         description: str | None = None,
         image_url: str | None = None,
+        region: str | None = None,
+        city_name: str | None = None,
+        owner_initials: str | None = None,
     ) -> bool:
         """Update STO profile fields. Returns True if updated."""
         values = {}
@@ -253,6 +259,12 @@ class STORepository:
             values["description"] = description.strip() or None
         if image_url is not None:
             values["image_url"] = image_url.strip() or None
+        if region is not None:
+            values["region"] = region.strip() or None
+        if city_name is not None:
+            values["city_name"] = city_name.strip() or None
+        if owner_initials is not None:
+            values["owner_initials"] = owner_initials.strip() or None
         if not values:
             return True
         result = await self.db.execute(update(STO).where(STO.id == sto_id).values(**values))

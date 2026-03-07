@@ -14,6 +14,7 @@ from app.models.region import Region
 from app.models.service import Service
 from app.models.service_catalog import ServiceCatalog
 from app.models.sto import STO
+from app.models.sto_image import STOImage
 from app.models.sto_request import STORequest
 from app.models.sto_service import StoService
 from app.models.user import User
@@ -35,6 +36,7 @@ __all__ = [
     "ServiceCatalog",
     "StoService",
     "STO",
+    "STOImage",
     "STORequest",
     "User",
     "UserRole",

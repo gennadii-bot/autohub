@@ -42,12 +42,9 @@ const LINES = {
 export function StatsChart({ data, title = "Системная аналитика", variant = "admin" }: StatsChartProps) {
   const lines = LINES[variant];
   return (
-    <div
-      className="rounded-xl border border-slate-700 bg-slate-800/50 p-6 backdrop-blur-sm"
-      style={{ minHeight: 350 }}
-    >
-      <h2 className="mb-6 text-lg font-semibold text-white">{title}</h2>
-      <div style={{ width: "100%", height: 350 }}>
+    <div className="w-full min-w-0 rounded-xl border border-slate-700 bg-slate-800/50 p-4 backdrop-blur-sm sm:p-6">
+      <h2 className="mb-4 text-lg font-semibold text-white sm:mb-6">{title}</h2>
+      <div className="h-[280px] w-full min-h-0 sm:h-[350px]">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#334155" />

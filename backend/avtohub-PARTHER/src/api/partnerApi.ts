@@ -14,6 +14,9 @@ export {
   getPartnerProfile as getProfile,
   updatePartnerProfile as updateProfile,
   uploadProfilePhoto,
+  uploadStoPhoto,
+  deleteStoPhoto,
+  getMediaUrl,
 } from "./partner";
 export type {
   PartnerDashboard as PartnerDashboardData,

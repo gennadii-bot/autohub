@@ -11,6 +11,7 @@ from app.api.deps import (
     get_booking_repository,
     get_message_repository,
     get_review_repository,
+    get_sto_image_repository,
     get_sto_repository,
     get_sto_service_repository,
     get_user_repository,
@@ -45,6 +46,7 @@ def get_partner_service(
     user_repo=Depends(get_user_repository),
     catalog_repo=Depends(get_service_catalog_repository),
     msg_repo=Depends(get_message_repository),
+    sto_image_repo=Depends(get_sto_image_repository),
 ) -> PartnerService:
     return PartnerService(
         sto_repo,
@@ -54,6 +56,7 @@ def get_partner_service(
         user_repo,
         catalog_repo,
         msg_repo,
+        sto_image_repo,
     )
 
 
@@ -272,6 +275,47 @@ async def upload_profile_photo(
     user: dict = Depends(get_current_user_sto_owner),
     svc: PartnerService = Depends(get_partner_service),
 ):
-    """Upload STO photo. Returns new image URL (relative path)."""
+    """Upload STO photo (legacy: updates image_url). Returns new image URL (relative path)."""
     url = await svc.upload_profile_photo(user["id"], photo)
     return {"url": url}
+
+
+@router.get("/sto/profile", response_model=PartnerProfileResponse)
+async def get_sto_profile(
+    user: dict = Depends(get_current_user_sto_owner),
+    svc: PartnerService = Depends(get_partner_service),
+):
+    """Get STO profile."""
+    return await svc.get_profile(user["id"])
+
+
+@router.put("/sto/profile", response_model=PartnerProfileResponse)
+@router.patch("/sto/profile", response_model=PartnerProfileResponse)
+async def update_sto_profile(
+    body: PartnerProfileUpdate,
+    user: dict = Depends(get_current_user_sto_owner),
+    svc: PartnerService = Depends(get_partner_service),
+):
+    """Update STO profile."""
+    return await svc.update_profile(user["id"], body)
+
+
+@router.post("/sto/upload-photo")
+async def upload_sto_photo(
+    file: UploadFile = File(..., description="Фото (jpg, png, webp, макс. 5 МБ)"),
+    user: dict = Depends(get_current_user_sto_owner),
+    svc: PartnerService = Depends(get_partner_service),
+):
+    """Upload photo to sto_images (max 10 per STO)."""
+    result = await svc.upload_sto_photo(user["id"], file)
+    return {"success": True, "image_url": result["image_url"], "id": result["id"]}
+
+
+@router.delete("/sto/photos/{image_id}", status_code=204)
+async def delete_sto_photo(
+    image_id: int = Path(..., gt=0),
+    user: dict = Depends(get_current_user_sto_owner),
+    svc: PartnerService = Depends(get_partner_service),
+):
+    """Delete photo from sto_images."""
+    await svc.delete_sto_photo(user["id"], image_id)
