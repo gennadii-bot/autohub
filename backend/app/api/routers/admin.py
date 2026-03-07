@@ -142,6 +142,21 @@ async def get_admin_stats(
     return {"success": True, "data": data}
 
 
+@router.get("/search")
+async def admin_search_by_id(
+    id: int = Query(..., gt=0, description="ID пользователя или СТО"),
+    _user: dict = Depends(get_current_admin),
+    admin_svc: AdminService = Depends(get_admin_service),
+):
+    """Поиск по ID: пользователь или СТО. Возвращает type и data. 404 если не найдено."""
+    from fastapi import HTTPException
+
+    result = await admin_svc.search_by_id(id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="User or STO not found")
+    return result
+
+
 @router.get("/finance/summary")
 async def get_finance_summary(
     date_from: date | None = Query(None),

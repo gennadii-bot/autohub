@@ -14,7 +14,7 @@ const REFRESH_INTERVAL_MS = 30_000;
 
 function defaultFrom(): string {
   const d = new Date();
-  d.setDate(d.getDate() - 30);
+  d.setDate(1);
   return d.toISOString().slice(0, 10);
 }
 

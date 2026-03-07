@@ -94,6 +94,39 @@ class AdminService:
         self.sto_request_repo = sto_request_repo
         self.catalog_repo = catalog_repo
 
+    async def search_by_id(
+        self, entity_id: int
+    ) -> dict | None:
+        """
+        Search by ID: user or STO.
+        Returns {"type": "user", "data": {...}} or {"type": "sto", "data": {...}}.
+        Returns None if not found. User has priority over STO when both exist.
+        """
+        user = await self.user_repo.get_by_id(entity_id)
+        if user is not None:
+            return {
+                "type": "user",
+                "data": {
+                    "id": user.id,
+                    "email": user.email,
+                    "role": user.role.value if hasattr(user.role, "value") else str(user.role),
+                    "city_id": user.city_id,
+                },
+            }
+        sto = await self.sto_repo.get_by_id_with_services(entity_id)
+        if sto is not None:
+            city_name = sto.city.name if sto.city else ""
+            return {
+                "type": "sto",
+                "data": {
+                    "id": sto.id,
+                    "name": sto.name,
+                    "city": city_name,
+                    "status": sto.status.value if hasattr(sto.status, "value") else str(sto.status),
+                },
+            }
+        return None
+
     async def get_stats(self) -> AdminStatsResponse:
         """Get admin dashboard stats. All queries run in parallel."""
         users_count, stos_count, pending_stos, pending_sto_requests, completed_services, average_rating = (

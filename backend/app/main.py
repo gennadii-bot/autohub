@@ -94,6 +94,8 @@ app.add_middleware(
         "http://127.0.0.1:5176",
         "http://127.0.0.1:5177",
         "http://127.0.0.1:5178",
+        "https://admin.altyncod.xyz",
+        "http://admin.altyncod.xyz",
     ],
     allow_credentials=True,
     allow_methods=["*"],

@@ -46,10 +46,20 @@ export interface AnalyticsResponse {
   };
 }
 
+function firstDayOfMonth(): string {
+  const d = new Date();
+  d.setDate(1);
+  return d.toISOString().slice(0, 10);
+}
+
+function todayStr(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
 export async function getAnalytics(
   params: {
-    from: string;
-    to: string;
+    from?: string;
+    to?: string;
     compare_from?: string;
     compare_to?: string;
     city_id?: number;
@@ -57,9 +67,11 @@ export async function getAnalytics(
     group_by?: "day" | "week" | "month";
   }
 ): Promise<AnalyticsRangePoint[] | AnalyticsResponse> {
+  const from = params.from ?? firstDayOfMonth();
+  const to = params.to ?? todayStr();
   const requestParams: Record<string, string | number> = {
-    from: params.from,
-    to: params.to,
+    from,
+    to,
     group_by: params.group_by ?? "day",
   };
   if (params.city_id != null && params.city_id > 0) {
@@ -200,9 +212,28 @@ export async function getUserDetail(userId: number) {
   return data;
 }
 
+export interface AdminSearchUserResult {
+  type: "user";
+  data: { id: number; email: string; role: string; city_id: number | null };
+}
+
+export interface AdminSearchStoResult {
+  type: "sto";
+  data: { id: number; name: string; city: string; status: string };
+}
+
+export type AdminSearchResult = AdminSearchUserResult | AdminSearchStoResult;
+
+export async function searchAdmin(id: number): Promise<AdminSearchResult> {
+  const { data } = await api.get<AdminSearchResult>("/admin/search", {
+    params: { id },
+  });
+  return data!;
+}
+
 export async function getStoDetail(stoId: number) {
-  const { data } = await api.get(`/admin/sto/${stoId}`);
-  return data;
+  const { data } = await api.get<{ success: boolean; data: unknown }>(`/admin/stos/${stoId}`);
+  return (data?.data ?? data) as unknown;
 }
 
 export async function getStoAnalytics(stoId: number, period: 7 | 30 | 90 | 365 = 30) {

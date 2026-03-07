@@ -12,6 +12,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import { AdminSearch } from "../components/AdminSearch";
 
 type MenuItem = {
   to: string;
@@ -50,13 +51,14 @@ export function AdminLayout() {
   return (
     <div className="flex min-h-screen bg-slate-950">
       <aside className="fixed left-0 top-0 z-40 flex h-screen w-64 flex-col border-r border-slate-800 bg-slate-900/95 backdrop-blur-xl">
-        <div className="border-b border-slate-800 p-6">
+        <div className="flex flex-col gap-4 border-b border-slate-800 p-6">
           <Link
             to="/dashboard"
             className="text-lg font-semibold text-white"
           >
             AvtoHub Admin
           </Link>
+          <AdminSearch />
         </div>
 
         <nav className="flex-1 space-y-1 overflow-y-auto p-4">
